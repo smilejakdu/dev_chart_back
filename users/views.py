@@ -15,6 +15,7 @@ from dev_chart_back.my_settings import SECRET_KEY, ALGORITHM
 class SignUpView(View):
     def post(self , request):
         data = json.loads(request.body)
+        
         try:
             for d in data:
                 if not data[d]:
@@ -25,12 +26,15 @@ class SignUpView(View):
             if User.objects.filter(email = data['email']).exists():
                 return JsonResponse({"message" : "EXISTS_EMAIL"} , status = 400)
 
-            if User.objects.filter(username = data['username']).exists():
+            if User.objects.filter(nickname = data['nickname']).exists():
                 return JsonResponse({"message" : "EXISTS_USERNAME"} , status = 400)
+
+            if data['password'] != data['repassword']:
+                return JsonResponse({"message" : "password_check"} , status = 400)
 
             User(
                 email    = data['email'],
-                username = data['username'],
+                nickname = data['nickname'],
                 password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             ).save()
 
@@ -59,7 +63,9 @@ class SignInView(View):
                                            SECRET_KEY['secret'],
                                            algorithm=ALGORITHM).decode('utf-8')
 
-                    return JsonResponse({'access': token}, status=200, content_type="application/json")
+                    return JsonResponse({'access'   : token,
+                                         'nickname' : user.nickname
+                                        }, status=200, content_type="application/json")
 
                 return HttpResponse(status=401)
 
@@ -84,4 +90,7 @@ class SignInView(View):
 
         return JsonResponse({"data" : list(data)}, status = 200)
 
+class ProfileView(View):
+    def get(self , request):
+        return
 
