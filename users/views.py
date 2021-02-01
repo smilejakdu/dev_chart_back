@@ -7,15 +7,17 @@ import requests
 from .models                    import User
 from django.views               import View
 from django.http                import HttpResponse, JsonResponse
+from django.db.models           import Count, Q , Sum
 from django.core.validators     import validate_email
 from django.core.exceptions     import ValidationError
 from dev_chart_back.my_settings import SECRET_KEY, ALGORITHM
+from datetime                   import datetime
 
 
 class SignUpView(View):
     def post(self , request):
         data = json.loads(request.body)
-        
+
         try:
             for d in data:
                 if not data[d]:
@@ -83,14 +85,36 @@ class SignInView(View):
         except Exception as e:
             return JsonResponse({"message" : e} , status = 400)
 
+class UserListView(View):
+
     def get(self , request):
-        data = list(User.
-                    objects.
-                    values("email"))
 
-        return JsonResponse({"data" : list(data)}, status = 200)
+        user_data = (User.
+                     objects.
+                     all())
 
-class ProfileView(View):
-    def get(self , request):
-        return
+        user_list = [{
+            'nickname' : user.nickname,
+            'date'     : f'{user.created_at.year}-{user.created_at.month}',
+        }for user in user_data]
 
+        return JsonResponse({"data" : list(user_list)}, status = 200)
+
+#class UserListView(View):
+#
+#    def get(self , request):
+#        sort_by   = request.GET.get('sort_by', 'id')
+#        offset    = int(request.GET.get('offset', 0))
+#        limit     = int(request.GET.get('limit', 5))
+#
+#        user_data = (User.
+#                     objects.
+#                     order_by(sort_by).
+#                     all()[offset:offset + limit])
+#
+#        user_list = [{
+#            'nickname' : user.nickname,
+#            'date'     : f'{user.created_at.year}-{user.created_at.month}',
+#        }for user in user_data]
+#
+#        return JsonResponse({"data" : list(user_list)}, status = 200)
