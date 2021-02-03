@@ -3,15 +3,20 @@ import jwt
 import re
 import bcrypt
 import requests
+import numpy as np
 
-from .models                    import User
+from dev_chart_back.my_settings import SECRET_KEY, ALGORITHM
 from django.views               import View
 from django.http                import HttpResponse, JsonResponse
 from django.db.models           import Count, Q , Sum
 from django.core.validators     import validate_email
 from django.core.exceptions     import ValidationError
-from dev_chart_back.my_settings import SECRET_KEY, ALGORITHM
+from .models                    import User
+
 from datetime                   import datetime
+from users.utils                import login_check
+from pprint                     import pprint as pp
+
 
 
 class SignUpView(View):
@@ -94,11 +99,121 @@ class UserListView(View):
                      all())
 
         user_list = [{
-            'nickname' : user.nickname,
-            'date'     : f'{user.created_at.year}-{user.created_at.month}',
+            'nickname'   : user.nickname,
+            'date'       : f'{user.created_at.year}-{user.created_at.month}',
+            'python'     : user.python,
+            'javascript' : user.javascript,
+            'java'       : user.java,
+            'c'          : user.c,
+            'c_plus'     : user.c_plus,
+            'spring'     : user.spring,
+            'django'     : user.django,
+            'flask'      : user.flask,
+            'express'    : user.express,
+            'react'      : user.react,
+            'vue'        : user.vue,
+            'laravel'    : user.laravel,
         }for user in user_data]
 
         return JsonResponse({"data" : list(user_list)}, status = 200)
+
+class ProgrammingView(View):
+    @login_check
+    def post(self , request):
+        data = json.loads(request.body)
+
+        try :
+            user = User.objects.get(email = request.user.email)
+
+            user.python     = data['python']
+            user.javascript = data['javascript']
+            user.java       = data['java']
+            user.php        = data['php']
+            user.c          = data['c']
+            user.c_plus     = data['c_plus']
+            user.spring     = data['spring']
+            user.django     = data['django']
+            user.flask      = data['flask']
+            user.express    = data['express']
+            user.react      = data['react']
+            user.vue        = data['vue']
+            user.laravel    = data['laravel']
+            user.save()
+
+            return HttpResponse(status = 200)
+
+        except Exception as e :
+            return JsonResponse({"message" : e} , status = 400)
+
+    @login_check
+    def get(self, request):
+        user_data = User.objects.filter(email = request.user.email)
+
+        try:
+
+            user_list = [{
+                'python'     : user.python,
+                'javascript' : user.javascript,
+                'java'       : user.java,
+                'php'        : user.php,
+                'c'          : user.c,
+                'c_plus'     : user.c_plus,
+                'spring'     : user.spring,
+                'django'     : user.django,
+                'flask'      : user.flask,
+                'express'    : user.express,
+                'react'      : user.react,
+                'vue'        : user.vue,
+                'laravel'    : user.laravel,
+            }for user in user_data]
+
+            return JsonResponse({"data" : user_list}, status = 200)
+
+        except KeyError:
+            return JsonResponse({"message" : "INVALID_KEYS"} , status = 400)
+
+        except Exception as e:
+            return JsonResponse({"message":e} , status = 400)
+
+def line_get_week_of_month(year, month, day):
+
+    result = datetime.date(year, month, day).strftime("%V")
+    if year == 2020:
+        return int(result) % 40+1
+    elif year == 2021:
+        return int(result) + 14
+
+class ChartDataView(View):
+    def get(self, request):
+        # user_data 중에 python , javascript , java ,php 에서 
+
+        try:
+
+            user_data = (User.
+                         objects.
+                         all())
+
+            user_list = [{
+                'user_count' : User.objects.all().count(),
+                'python'     : User.objects.filter(python='True').count(),
+                'javascript' : User.objects.filter(javascript='True').count(),
+                'java'       : User.objects.filter(java='True').count(),
+                'php'        : User.objects.filter(php='True').count(),
+                'c'          : User.objects.filter(c='True').count(),
+                'c_plus'     : User.objects.filter(c_plus='True').count(),
+                'spring'     : User.objects.filter(spring='True').count(),
+                'django'     : User.objects.filter(django='True').count(),
+                'flask'      : User.objects.filter(flask='True').count(),
+                'express'    : User.objects.filter(express='True').count(),
+                'react'      : User.objects.filter(react='True').count(),
+                'vue'        : User.objects.filter(vue='True').count(),
+                'laravel'    : User.objects.filter(laravel='True').count(),
+            }]
+
+            return JsonResponse({"data" : user_list} , status = 200)
+
+        except Exception as e:
+            return JsonResponse({"message" :e }, status = 400)
 
 #class UserListView(View):
 #
