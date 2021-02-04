@@ -189,25 +189,25 @@ class ChartDataView(View):
 
         try:
 
-            user_data = (User.
-                         objects.
-                         all())
+            user        = User.objects.all()
+            python_user = round(user.filter(python='True').count() / user.count() , 2 )
 
             user_list = [{
-                'user_count' : User.objects.all().count(),
-                'python'     : User.objects.filter(python='True').count(),
-                'javascript' : User.objects.filter(javascript='True').count(),
-                'java'       : User.objects.filter(java='True').count(),
-                'php'        : User.objects.filter(php='True').count(),
-                'c'          : User.objects.filter(c='True').count(),
-                'c_plus'     : User.objects.filter(c_plus='True').count(),
-                'spring'     : User.objects.filter(spring='True').count(),
-                'django'     : User.objects.filter(django='True').count(),
-                'flask'      : User.objects.filter(flask='True').count(),
-                'express'    : User.objects.filter(express='True').count(),
-                'react'      : User.objects.filter(react='True').count(),
-                'vue'        : User.objects.filter(vue='True').count(),
-                'laravel'    : User.objects.filter(laravel='True').count(),
+                'user_count'        : user.count(),
+                'python_user_count' : python_user,
+                'python'            : user.filter(python     = 'True').count(),
+                'javascript'        : user.filter(javascript = 'True').count(),
+                'java'              : user.filter(java       = 'True').count(),
+                'php'               : user.filter(php        = 'True').count(),
+                'c'                 : user.filter(c          = 'True').count(),
+                'c_plus'            : user.filter(c_plus     = 'True').count(),
+                'spring'            : user.filter(spring     = 'True').count(),
+                'django'            : user.filter(django     = 'True').count(),
+                'flask'             : user.filter(flask      = 'True').count(),
+                'express'           : user.filter(express    = 'True').count(),
+                'react'             : user.filter(react      = 'True').count(),
+                'vue'               : user.filter(vue        = 'True').count(),
+                'laravel'           : user.filter(laravel    = 'True').count(),
             }]
 
             return JsonResponse({"data" : user_list} , status = 200)
